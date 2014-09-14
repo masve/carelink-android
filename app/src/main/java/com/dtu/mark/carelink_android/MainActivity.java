@@ -51,18 +51,34 @@ public class MainActivity extends Activity {
         try {
             stick.open();
 
-            String op = "0x04";
+//            String op = "0x04";
+//
+//            int op2 = Integer.decode(op);
+//            byte command = (byte)op2;
 
-            int op2 = Integer.decode(op);
-            byte command = (byte)op2;
+            //byte[] command = new byte[] {0x04, 0x01};
+
+            byte command[] = {0x04, 0x00};
 
             appendToLog("info", "connection opened");
-            appendToLog("info", "sending command "+op+"...");
+            appendToLog("info", "sending command...");
 
             ByteBuffer result = stick.sendCommand(command);
+//            ByteBuffer something = ByteBuffer.allocate(64);
+//            something.put(command, 0, command.length);
+
             byte[] result2 = result.array();
-             //       new String(result.array());
-            String result3 = new String(result2,"UTF-8");
+//            byte[] something2 = something.array();
+
+//            for(int i = 0; i < result2.length; i++) {
+//                log.append("buffer["+i+"] " + something2[i]+"\n");
+//            }
+
+
+            //byte[] serial = Arrays.copyOfRange(result2, 0, 3);
+
+            String result3 = new String(result2, "US-ASCII");
+
 
             appendToLog("info", "result returned");
             log.append("========result start=========\n");

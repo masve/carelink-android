@@ -69,7 +69,14 @@ public class CareLinkUsb {
         mUsbDeviceConnection.releaseInterface(iFace);
         mUsbDeviceConnection.close();
     }
-    public ByteBuffer sendCommand(Byte command) throws UsbException {
+
+    /**
+     * http://stackoverflow.com/questions/12345953/android-usb-host-asynchronous-interrupt-transfer
+     * @param command
+     * @return
+     * @throws UsbException
+     */
+    public ByteBuffer sendCommand(byte[] command) throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
         }
@@ -78,13 +85,18 @@ public class CareLinkUsb {
         ByteBuffer buffer = ByteBuffer.allocate(bufferMaxLength);
         UsbRequest request = new UsbRequest();
         request.initialize(mUsbDeviceConnection, epOUT);
-        buffer.put(command);
+//        for(int i = 0; i < command.length; i++) {
+//            buffer.put(command[i]);
+//
+//        }
 
-        boolean retval = request.queue(buffer, bufferMaxLength);
+        buffer.put(command, 0, command.length);
+
+        boolean retval = request.queue(buffer, buffer.position());
         if (mUsbDeviceConnection.requestWait() == request) {
             UsbRequest inRequest = new UsbRequest();
             inRequest.initialize(mUsbDeviceConnection, epIN);
-            if (inRequest.queue(buffer,bufferMaxLength) == true) {
+            if (inRequest.queue(buffer, bufferMaxLength)) {
                 mUsbDeviceConnection.requestWait();
                 return buffer;
             }
