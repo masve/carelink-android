@@ -2,12 +2,14 @@ package com.dtu.mark.carelink_android.USB;
 
 import android.app.Activity;
 import android.content.Context;
+import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbRequest;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -46,15 +48,22 @@ public class CareLinkUsb {
         }
 
         iFace = mUsbDevice.getInterface(0);
+        //mUsbDeviceConnection.claimInterface(iFace, true);
 
-        // assigning endpoint in and out
-        if (iFace.getEndpoint(0).getDirection() == 0) {
-            epOUT = iFace.getEndpoint(0);
-            epIN = iFace.getEndpoint(1);
-        } else {
-            epOUT = iFace.getEndpoint(1);
-            epIN = iFace.getEndpoint(0);
-        }
+
+//        if (iFace.getEndpoint(0).getDirection() == UsbConstants.USB_DIR_OUT) {
+//            epOUT = iFace.getEndpoint(0);
+//            epIN = iFace.getEndpoint(1);
+//        } else {
+//            epOUT = iFace.getEndpoint(1);
+//            epIN = iFace.getEndpoint(0);
+//        }
+
+
+
+        // Assigning endpoint in and out
+        epOUT = iFace.getEndpoint(0);
+        epIN = iFace.getEndpoint(1);
 
         mUsbDeviceConnection = mUsbManager.openDevice(mUsbDevice);
 
@@ -76,29 +85,36 @@ public class CareLinkUsb {
      * @return
      * @throws UsbException
      */
-    public ByteBuffer sendCommand(byte[] command) throws UsbException {
+    public byte[] sendCommand(byte[] command) throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
         }
 
+        // MaxPacketSize = 64
         int bufferMaxLength = epOUT.getMaxPacketSize();
         ByteBuffer buffer = ByteBuffer.allocate(bufferMaxLength);
-        UsbRequest request = new UsbRequest();
-        request.initialize(mUsbDeviceConnection, epOUT);
+        UsbRequest outRequest = new UsbRequest();
+        outRequest.initialize(mUsbDeviceConnection, epOUT);
+
 //        for(int i = 0; i < command.length; i++) {
 //            buffer.put(command[i]);
 //
 //        }
 
-        buffer.put(command, 0, command.length);
+//        buffer.put(command, 0, command.length);
 
-        boolean retval = request.queue(buffer, buffer.position());
-        if (mUsbDeviceConnection.requestWait() == request) {
+        // Putting op in buffer
+        buffer.put(command);
+        // Queue outbound request
+        outRequest.queue(buffer, bufferMaxLength);
+
+        // Receive data from device
+        if (outRequest.equals(mUsbDeviceConnection.requestWait())) {
             UsbRequest inRequest = new UsbRequest();
             inRequest.initialize(mUsbDeviceConnection, epIN);
             if (inRequest.queue(buffer, bufferMaxLength)) {
                 mUsbDeviceConnection.requestWait();
-                return buffer;
+                return buffer.array();
             }
         }
         return null;

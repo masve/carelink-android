@@ -63,21 +63,17 @@ public class MainActivity extends Activity {
             appendToLog("info", "connection opened");
             appendToLog("info", "sending command...");
 
-            ByteBuffer result = stick.sendCommand(command);
-//            ByteBuffer something = ByteBuffer.allocate(64);
-//            something.put(command, 0, command.length);
+            byte[] result = stick.sendCommand(command);
 
-            byte[] result2 = result.array();
-//            byte[] something2 = something.array();
+
+//            byte[] result2 = result.array();
 
 //            for(int i = 0; i < result2.length; i++) {
 //                log.append("buffer["+i+"] " + something2[i]+"\n");
 //            }
 
 
-            //byte[] serial = Arrays.copyOfRange(result2, 0, 3);
-
-            String result3 = new String(result2, "US-ASCII");
+            String result3 = new String(result, "US-ASCII");
 
 
             appendToLog("info", "result returned");
