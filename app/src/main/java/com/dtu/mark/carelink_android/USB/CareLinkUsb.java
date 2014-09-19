@@ -20,13 +20,19 @@ import java.util.Iterator;
  */
 public class CareLinkUsb {
 
-    Context context;
+    private static final int VENDOR_ID = 2593;
+    private static final int PRODUCT_ID = 32769;
+    private static final int MAX_PACKAGE_SIZE = 64;
 
-    UsbManager mUsbManager;
-    UsbDevice mUsbDevice;
-    UsbDeviceConnection mUsbDeviceConnection;
-    UsbInterface iFace;
-    UsbEndpoint epIN, epOUT;
+    private static final String TAG = "CareLinkUsb";
+
+    private Context context;
+    private UsbManager mUsbManager;
+    private UsbDevice mUsbDevice;
+    private UsbDeviceConnection mUsbDeviceConnection;
+    private UsbInterface mInterface;
+    private UsbEndpoint epIN, epOUT;
+
 
 
     public CareLinkUsb(Activity activity) {
@@ -38,85 +44,135 @@ public class CareLinkUsb {
 
         HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
 
+        Log.d(TAG, "Enumerating connected devices...");
+
+        // Getting the CareLink UsbDevice object
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
         while (deviceIterator.hasNext()) {
             mUsbDevice = deviceIterator.next();
+            if (mUsbDevice.getVendorId() == VENDOR_ID && mUsbDevice.getProductId() == PRODUCT_ID) {
+                break;
+            }
         }
 
         if (mUsbDevice == null) {
-            throw new UsbException("device not found");
+            throw new UsbException("Device not found");
         }
 
-        iFace = mUsbDevice.getInterface(0);
-        //mUsbDeviceConnection.claimInterface(iFace, true);
+        Log.d(TAG, "Device found");
 
-
-//        if (iFace.getEndpoint(0).getDirection() == UsbConstants.USB_DIR_OUT) {
-//            epOUT = iFace.getEndpoint(0);
-//            epIN = iFace.getEndpoint(1);
-//        } else {
-//            epOUT = iFace.getEndpoint(1);
-//            epIN = iFace.getEndpoint(0);
-//        }
-
-
+        // Assigning interface
+        mInterface = mUsbDevice.getInterface(0);
 
         // Assigning endpoint in and out
-        epOUT = iFace.getEndpoint(0);
-        epIN = iFace.getEndpoint(1);
+        epOUT = mInterface.getEndpoint(0);
+        epIN = mInterface.getEndpoint(1);
 
+        // Open connection
         mUsbDeviceConnection = mUsbManager.openDevice(mUsbDevice);
 
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
         }
     }
+
     public void close() throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
         }
-        mUsbDeviceConnection.releaseInterface(iFace);
+        mUsbDeviceConnection.releaseInterface(mInterface);
         mUsbDeviceConnection.close();
     }
 
     /**
-     * http://stackoverflow.com/questions/12345953/android-usb-host-asynchronous-interrupt-transfer
-     * @param command
-     * @return
+     * Gets the response from the connected device.
+     * @param outRequest UsbRequest referencing the request.
+     * @return Returns the response in a byte[].
      * @throws UsbException
      */
-    public byte[] sendCommand(byte[] command) throws UsbException {
+    public byte[] read(UsbRequest outRequest) throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
         }
 
-        // MaxPacketSize = 64
-        int bufferMaxLength = epOUT.getMaxPacketSize();
-        ByteBuffer buffer = ByteBuffer.allocate(bufferMaxLength);
-        UsbRequest outRequest = new UsbRequest();
-        outRequest.initialize(mUsbDeviceConnection, epOUT);
-
-//        for(int i = 0; i < command.length; i++) {
-//            buffer.put(command[i]);
-//
-//        }
-
-//        buffer.put(command, 0, command.length);
-
-        // Putting op in buffer
-        buffer.put(command);
-        // Queue outbound request
-        outRequest.queue(buffer, bufferMaxLength);
+        ByteBuffer buffer = ByteBuffer.allocate(MAX_PACKAGE_SIZE);
 
         // Receive data from device
         if (outRequest.equals(mUsbDeviceConnection.requestWait())) {
             UsbRequest inRequest = new UsbRequest();
             inRequest.initialize(mUsbDeviceConnection, epIN);
-            if (inRequest.queue(buffer, bufferMaxLength)) {
+            if (inRequest.queue(buffer, MAX_PACKAGE_SIZE)) {
                 mUsbDeviceConnection.requestWait();
                 return buffer.array();
             }
         }
         return null;
+    }
+
+    /**
+     * Write a command to the connected device.
+     * @param command Byte[] containing the opcode for the command.
+     * @return Returns the response in a byte[].
+     * @throws UsbException
+     */
+    public UsbRequest write(byte[] command) throws UsbException {
+        if (mUsbDeviceConnection == null) {
+            throw new UsbException("no connection available");
+        }
+
+        ByteBuffer buffer = ByteBuffer.allocate(MAX_PACKAGE_SIZE);
+
+        UsbRequest outRequest = new UsbRequest();
+        outRequest.initialize(mUsbDeviceConnection, epOUT);
+
+        buffer.put(command);
+        outRequest.queue(buffer, MAX_PACKAGE_SIZE);
+
+        return outRequest;
+    }
+
+    /**
+     * http://stackoverflow.com/questions/12345953/android-usb-host-asynchronous-interrupt-transfer
+     *
+     * Wrapper for CareLinkUsb.write() and CareLinkUsb.read()
+     * @param command Byte[] containing the opcode for the command.
+     * @return Returns a reference to the UsbRequest put in the output queue.
+     * @throws UsbException
+     */
+    public byte[] sendCommand(byte[] command) throws UsbException {
+//        if (mUsbDeviceConnection == null) {
+//            throw new UsbException("no connection available");
+//        }
+//
+//        // MaxPacketSize = 64
+//        int bufferMaxLength = epOUT.getMaxPacketSize();
+//        ByteBuffer buffer = ByteBuffer.allocate(bufferMaxLength);
+//        UsbRequest outRequest = new UsbRequest();
+//        outRequest.initialize(mUsbDeviceConnection, epOUT);
+//
+////        for(int i = 0; i < command.length; i++) {
+////            buffer.put(command[i]);
+////
+////        }
+//
+////        buffer.put(command, 0, command.length);
+//
+//        // Putting op in buffer
+//        buffer.put(command);
+//        // Queue outbound request
+//        outRequest.queue(buffer, bufferMaxLength);
+//
+//        // Receive data from device
+//        if (outRequest.equals(mUsbDeviceConnection.requestWait())) {
+//            UsbRequest inRequest = new UsbRequest();
+//            inRequest.initialize(mUsbDeviceConnection, epIN);
+//            if (inRequest.queue(buffer, bufferMaxLength)) {
+//                mUsbDeviceConnection.requestWait();
+//                return buffer.array();
+//            }
+//        }
+//        return null;
+        UsbRequest request = write(command);
+        return read(request);
     }
 }
