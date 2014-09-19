@@ -7,4 +7,5 @@ The following image shows, that we can send a request to the usb stick, and get 
 https://gist.github.com/marksvdev/d179729faeef3d66d4b0
 
 Opcode 0x04, 0x00 result to string shown below:
+
 ![com1](http://i.imgur.com/CzHlNWY.png)
