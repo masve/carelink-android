@@ -7,6 +7,6 @@ The following gist shows the bytearray response from the stick using simple comm
 
 https://gist.github.com/marksvdev/d179729faeef3d66d4b0
 
-In the screenshot shown below the response from the opcode [ 0x04, 0x00 ] in non-decoded form:
+In the screenshot shown below the response from the opcode [ 0x04, 0x00 ] in non-decoded-toString form:
 
 ![com1](http://i.imgur.com/CzHlNWY.png)
