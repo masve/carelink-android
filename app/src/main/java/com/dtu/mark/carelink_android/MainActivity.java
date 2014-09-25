@@ -1,34 +1,16 @@
 package com.dtu.mark.carelink_android;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Typeface;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbEndpoint;
-import android.hardware.usb.UsbInterface;
-import android.hardware.usb.UsbManager;
-import android.hardware.usb.UsbRequest;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.view.Menu;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.widget.TextView;
 
 import com.dtu.mark.carelink_android.USB.CareLinkUsb;
 import com.dtu.mark.carelink_android.USB.UsbException;
-import com.hoho.android.usbserial.driver.UsbSerialDriver;
-import com.hoho.android.usbserial.driver.UsbSerialPort;
-import com.hoho.android.usbserial.driver.UsbSerialProber;
-
 import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 
 public class MainActivity extends Activity {
