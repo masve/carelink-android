@@ -1,0 +1,47 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <!-- JQuery isn't needed for JockeyJS, just used in this example. -->
+    <script type="text/javascript" src="file:///android_asset/jquery-1.9.1.js"></script>
+
+    <!-- Required includes. json2.js may not be required in specific instances. -->
+    <script type="text/javascript" src="file:///android_asset/jockey.js"></script>
+
+    <!--
+    Jockey.send("write", {
+			        command: opcode
+			    });
+
+			    Jockey.send("read");
+    -->
+
+    <script type="text/javascript">
+
+            var opcode = [0x04,0x00];
+            var data;
+
+			Jockey.on("send-opcode", function() {
+			    Jockey.send("open");
+			});
+
+			Jockey.on("doRead", function(payload) {
+    			<!-- READ PAYLOAD -->
+    			data = payload.data;
+		        <!-- DECODE -->
+
+		        <!-- SEND BACK -->
+		        Jockey.send("message", {
+		            message: data
+		        });
+			});
+    </script>
+
+</head>
+<body>
+
+<span id="counter">0</span>
+
+</body>
+</html>
+

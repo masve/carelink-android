@@ -18,7 +18,7 @@ import java.util.Iterator;
 /**
  * Created by mark on 14/09/14.
  */
-public class CareLinkUsb {
+public class CareLinkUsb implements ICareLinkUsb {
 
     private static final int VENDOR_ID = 2593;
     private static final int PRODUCT_ID = 32769;
@@ -35,10 +35,27 @@ public class CareLinkUsb {
     private UsbEndpoint epIN, epOUT;
     private UsbRequest currentRequest;
 
-    public CareLinkUsb(Activity activity) {
-        context = activity.getBaseContext();
+    private static CareLinkUsb instance;
+
+//    public CareLinkUsb(Context context) {
+//        this.context = context;
+//    }
+
+    private CareLinkUsb(Context context) {
+        this.context = context;
     }
 
+    public static CareLinkUsb getInstance(Context context) {
+        if (instance == null) {
+            instance = new CareLinkUsb(context);
+        }
+        return instance;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void open() throws UsbException {
         mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 
@@ -76,6 +93,10 @@ public class CareLinkUsb {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void close() throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
@@ -85,20 +106,22 @@ public class CareLinkUsb {
     }
 
     /**
-     * Gets the response from the connected device.
-     * @param outRequest UsbRequest referencing the request.
-     * @return Returns the response in a byte[].
-     * @throws UsbException
+     * {@inheritDoc}
      */
-    public byte[] read(UsbRequest outRequest) throws UsbException {
+    @Override
+    public byte[] read() throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
+        }
+
+        if (currentRequest == null) {
+            throw new UsbException("there is nothing to read");
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(MAX_PACKAGE_SIZE);
 
         // Receive data from device
-        if (outRequest.equals(mUsbDeviceConnection.requestWait())) {
+        if (currentRequest.equals(mUsbDeviceConnection.requestWait())) {
             UsbRequest inRequest = new UsbRequest();
             inRequest.initialize(mUsbDeviceConnection, epIN);
             if (inRequest.queue(buffer, MAX_PACKAGE_SIZE)) {
@@ -110,11 +133,9 @@ public class CareLinkUsb {
     }
 
     /**
-     * Write a command to the connected device.
-     * @param command Byte[] containing the opcode for the command.
-     * @return Returns the response in a byte[].
-     * @throws UsbException
+     * {@inheritDoc}
      */
+    @Override
     public void write(byte[] command) throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("no connection available");
@@ -130,13 +151,11 @@ public class CareLinkUsb {
     }
 
     /**
-     * Wrapper for CareLinkUsb.write() and CareLinkUsb.read()
-     * @param command Byte[] containing the opcode for the command.
-     * @return Returns a reference to the UsbRequest put in the output queue.
-     * @throws UsbException
+     * {@inheritDoc}
      */
+    @Override
     public byte[] sendCommand(byte[] command) throws UsbException {
         write(command);
-        return read(currentRequest);
+        return read();
     }
 }

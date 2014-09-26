@@ -24,9 +24,9 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Send Command"
+        android:text="Initialize Command"
         android:id="@+id/btnConnect"
-        android:onClick="onSendCommand"
+        android:onClick="onInitCommand"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

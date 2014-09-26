@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="debug" >
+        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/build/intermediates/bundles/debug/assets" />
+    </dataSet>
+    <dataSet config="main" >
+        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/androidTest/assets" />
+    </dataSet>
+
+</merger>
