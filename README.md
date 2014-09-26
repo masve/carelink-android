@@ -17,7 +17,7 @@ carelink-android-prototype
 
 Currently working on branch carelink-android-prototype.
 
-Interfacing between Java and Javascript/JockeyJS in a WebView. WebViewHandler will handle all communication between Jockey and CareLink stick using CareLinkUsb.java.
+Interfacing between Java and Javascript/JockeyJS in a WebView. WebViewHandler.java will handle all communication between Jockey and CareLink stick using CareLinkUsb.java.
 
 The following diagram shows a rough sketch of what I'm trying to accomplish:
 
