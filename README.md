@@ -23,4 +23,4 @@ The following diagram shows a rough sketch of what I'm trying to accomplish:
 
 ![sketch](http://i.imgur.com/s5marpg.png)
 
-Basically trying to move most of the control from Java (see current master branch) to Jockey. Only using Java/Android as a passthrough to the stick using it's Usb Host API.
+Basically trying to move most of the control from Java (see current master branch) to Jockey. Only using Java/Android as a passthrough to the stick using its Usb Host API.
