@@ -1,9 +1,7 @@
 package com.dtu.mark.carelink_android.Services;
 
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
@@ -14,25 +12,19 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.dtu.mark.carelink_android.MainActivity;
 import com.dtu.mark.carelink_android.USB.CareLinkUsb;
-import com.dtu.mark.carelink_android.USB.ICareLinkUsb;
 import com.dtu.mark.carelink_android.USB.UsbException;
 import com.jockeyjs.Jockey;
 import com.jockeyjs.JockeyAsyncHandler;
-import com.jockeyjs.JockeyCallback;
 import com.jockeyjs.JockeyHandler;
 import com.jockeyjs.JockeyImpl;
-import com.jockeyjs.JockeyService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by marksv on 9/26/14.
@@ -47,7 +39,7 @@ public class WebViewHandler extends Service {
 
     private static final String TAG = "WebViewHandler";
 
-    ICareLinkUsb stick;
+    CareLinkUsb stick;
 
     Handler mHandler = new Handler();
 
@@ -63,7 +55,7 @@ public class WebViewHandler extends Service {
 
         WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.TOP | Gravity.LEFT;
+        params.gravity = Gravity.TOP | Gravity.START;
         params.x = 0;
         params.y = 0;
         params.width = 0;
@@ -100,27 +92,21 @@ public class WebViewHandler extends Service {
 
         wv.loadUrl("file:///android_asset/index.html");
 
-        stick = CareLinkUsb.getInstance(this);
+//        stick = CareLinkUsb.getInstance(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Log.d(TAG, "Getting stick from intent");
+        stick = (CareLinkUsb) intent.getParcelableExtra("stick");
+        Log.d(TAG, "Did get the stick from intent");
 
         mHandler.removeCallbacks(init);
         mHandler.postDelayed(init, 1000);
+
+        return 0;
     }
-
-    private Runnable init = new Runnable() {
-        @Override
-        public void run() {
-            initSend();
-
-            mHandler.removeCallbacks(init);
-            mHandler.postDelayed(init, 1000);
-        }
-    };
-//
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//
-//        return super.onStartCommand(intent, flags, startId);
-//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -132,6 +118,16 @@ public class WebViewHandler extends Service {
         Log.d(TAG, "opcode init sent");
     }
 
+
+    private Runnable init = new Runnable() {
+        @Override
+        public void run() {
+            initSend();
+
+            mHandler.removeCallbacks(init);
+        }
+    };
+
     private void doWrite(Object byteArrayCommand) {
         try {
             // Convert object back to bytearray
@@ -139,7 +135,13 @@ public class WebViewHandler extends Service {
             ObjectOutputStream os = new ObjectOutputStream(out);
             os.writeObject(byteArrayCommand);
 
-            stick.write(out.toByteArray());
+            byte[] data = out.toByteArray();
+
+            for(int i = 0; i < data.length; i++) {
+                Log.d(TAG, "data["+i+"] = " + data[i]);
+            }
+
+            stick.write(data);
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         } catch (UsbException e) {
@@ -224,7 +226,7 @@ public class WebViewHandler extends Service {
                 Log.d(TAG, "Jockey called message");
                 message = payload.get("message").toString();
                 Log.d(TAG, "message received: " + message);
-                MainActivity.appendToLog(message);
+                doSendMessage();
             }
         });
 

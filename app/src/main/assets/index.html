@@ -22,8 +22,21 @@
             var data;
 
 			Jockey.on("send-opcode", function() {
-			    Jockey.send("ping");
+			    Jockey.send("open");
+
+			    setTimeout(doWrite, 1000);
+			    setTimeout(doRead, 1000)
 			});
+
+			function doWrite() {
+			    Jockey.send("write", function() {
+			        command: opcode
+			    });
+			}
+
+			function doRead() {
+			    Jockey.send("read");
+			}
 
 			Jockey.on("doRead", function(payload) {
     			<!-- READ PAYLOAD -->

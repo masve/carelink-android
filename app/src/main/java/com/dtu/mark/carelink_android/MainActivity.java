@@ -9,24 +9,29 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 
+import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.dtu.mark.carelink_android.Services.WebViewHandler;
 import com.dtu.mark.carelink_android.USB.CareLinkUsb;
+import com.dtu.mark.carelink_android.USB.UsbException;
 
 
 public class MainActivity extends Activity {
 
+    public static String TAG = "MainActivity";
+
     public static TextView log;
-    public CareLinkUsb stick;
+    //public CareLinkUsb stick;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        stick = CareLinkUsb.getInstance(this);
+        //stick = CareLinkUsb.getInstance(this);
 
         registerReceiver(logUpdate, new IntentFilter("UPDATE_LOG"));
 
@@ -42,7 +47,19 @@ public class MainActivity extends Activity {
     }
 
     public void onInitCommand(View view) {
-        startService(new Intent(this, WebViewHandler.class));
+        try {
+            CareLinkUsb stick = new CareLinkUsb(this);
+            Intent intent = new Intent(this, WebViewHandler.class);
+            intent.putExtra("stick", (android.os.Parcelable) stick);
+
+
+            startService(intent);
+        } catch (UsbException e) {
+            e.printStackTrace();
+            Log.d(TAG, "error here");
+        }
+
+
     }
 
     private BroadcastReceiver logUpdate = new BroadcastReceiver() {
