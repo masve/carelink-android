@@ -22,7 +22,7 @@
             var data;
 
 			Jockey.on("send-opcode", function() {
-			    Jockey.send("open");
+			    Jockey.send("ping");
 			});
 
 			Jockey.on("doRead", function(payload) {

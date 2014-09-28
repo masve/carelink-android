@@ -2,10 +2,10 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/assets" />
+        <source path="/home/mark/dev/android-projects/carelink-android/libraries/jockeyJSAndroid/src/main/assets" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/debug/assets" />
+        <source path="/home/mark/dev/android-projects/carelink-android/libraries/jockeyJSAndroid/src/debug/assets" />
     </dataSet>
 
 </merger>

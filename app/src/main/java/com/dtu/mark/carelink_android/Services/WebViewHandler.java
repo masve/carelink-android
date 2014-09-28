@@ -91,7 +91,7 @@ public class WebViewHandler extends Service {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                Log.d("webViewClient", "page finished loading!");
+                Log.d(TAG, "page finished loading!");
             }
         });
 
@@ -112,6 +112,7 @@ public class WebViewHandler extends Service {
             initSend();
 
             mHandler.removeCallbacks(init);
+            mHandler.postDelayed(init, 1000);
         }
     };
 //
@@ -188,6 +189,7 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called open");
                 doOpen();
+                Log.d(TAG, "Device opened");
             }
         });
 
