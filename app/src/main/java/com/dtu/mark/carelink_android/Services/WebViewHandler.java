@@ -162,8 +162,8 @@ public class WebViewHandler extends Service {
         try {
             byte[] data = DataConverter.hexStringArrayToByteArray(command.split(","));
 
-            for(int i = 0; i < data.length; i++) {
-                Log.d(TAG, "data["+i+"] = " + data[i]);
+            for (int i = 0; i < data.length; i++) {
+                Log.d(TAG, "data[" + i + "] = " + data[i]);
             }
 
             stick.write(data);
@@ -185,7 +185,7 @@ public class WebViewHandler extends Service {
             byte[] data = stick.read();
 
             for (int i = 0; i < data.length; i++) {
-                Log.d(TAG, "data["+i+"] = " + data[i]);
+                Log.d(TAG, "data[" + i + "] = " + data[i]);
             }
 
             String strData = DataConverter.byteArrayToString(data);
@@ -241,7 +241,6 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called read");
                 doRead();
-                Log.d(TAG, "Device closed");
             }
         });
 
@@ -250,6 +249,7 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called close");
                 doClose();
+                Log.d(TAG, "Device closed");
             }
         });
 
