@@ -65,15 +65,15 @@ public class WebViewHandler extends Service {
         params.width = 0;
         params.height = 0;
 
-        LinearLayout view = new LinearLayout(this);
-        view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
+        //LinearLayout view = new LinearLayout(this);
+        //view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
 
         wv = new WebView(this);
-        wv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        view.addView(wv);
+        //wv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        //view.addView(wv);
 
 
-        windowManager.addView(view, params);
+        windowManager.addView(wv, params);
 
         /**
          * Initialize JockeyJS and load index.html with javascript
@@ -241,6 +241,7 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called read");
                 doRead();
+                Log.d(TAG, "Device closed");
             }
         });
 
@@ -258,7 +259,7 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called message");
                 message = payload.get("message").toString();
-                Log.d(TAG, "message received: " + message);
+                Log.d(TAG, "Message from Jockey: " + message);
                 doSendMessage();
             }
         });

@@ -17,6 +17,13 @@
 
 			    setTimeout(doClose, 2000);
 			    var result = "Serial: " + json.serial + "\n Product" + json.product  + "\nDescription" + json.description + "\nFirmware" + json.firmware  + "\n";
+
+			    var array = returned.split(' ').map(function(c) {return parseInt(c, 16)});
+
+		        console.log(array);
+
+		        var result = decode_product_info(array);
+		        var json = JSON.stringify(result);
     -->
 
     <script type="text/javascript">
@@ -28,12 +35,8 @@
 			    Jockey.send("open");
 
 			    setTimeout(doWrite, 1000);
-			    setTimeout(doRead, 1000);
+			    setTimeout(doRead, 2000);
 
-			});
-
-			Jockey.on("doSomething", function() {
-			    Jockey.send("write", { command: opcode2 } )
 			});
 
 			function doWrite() {
@@ -54,15 +57,13 @@
     			console.log(returned);
 
 		        <!-- DECODE -->
-		        var array = returned.split(' ').map(function(c) {return parseInt(c, 16)});
-
-		        console.log(array);
-
-		        var result = decode_product_info(array);
-		        var json = JSON.stringify(result);
+		        var result = returned.split(' ')[1];
 
 		        <!-- SEND BACK -->
-		        Jockey.send("message", { message: json } )
+		        Jockey.send("message", { message: result } )
+
+		        <!-- CLOSE CONNECTION -->
+		        Jockey.send("close");
 			});
 
 			function decode_product_info (data) {
