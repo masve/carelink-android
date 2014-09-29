@@ -15,7 +15,9 @@ import android.widget.RelativeLayout;
 
 import com.dtu.mark.carelink_android.MainActivity;
 import com.dtu.mark.carelink_android.USB.CareLinkUsb;
+import com.dtu.mark.carelink_android.USB.DataConverter;
 import com.dtu.mark.carelink_android.USB.UsbException;
+import com.dtu.mark.carelink_android.USB.UsbHandler;
 import com.jockeyjs.Jockey;
 import com.jockeyjs.JockeyAsyncHandler;
 import com.jockeyjs.JockeyHandler;
@@ -42,6 +44,8 @@ public class WebViewHandler extends Service {
     CareLinkUsb stick;
 
     Handler mHandler = new Handler();
+
+    private UsbHandler usbHandler;
 
     @Override
     public void onCreate() {
@@ -84,6 +88,9 @@ public class WebViewHandler extends Service {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 Log.d(TAG, "page finished loading!");
+
+                mHandler.removeCallbacks(init);
+                mHandler.postDelayed(init, 1000);
             }
         });
 
@@ -93,19 +100,35 @@ public class WebViewHandler extends Service {
         wv.loadUrl("file:///android_asset/index.html");
 
 //        stick = CareLinkUsb.getInstance(this);
+
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d(TAG, "Getting stick from intent");
-        stick = (CareLinkUsb) intent.getParcelableExtra("stick");
-        Log.d(TAG, "Did get the stick from intent");
+        //Log.d(TAG, "Getting stick from intent");
+        //stick = (CareLinkUsb) intent.getParcelableExtra("stick");
+        //Log.d(TAG, "Did get the stick from intent");
 
-        mHandler.removeCallbacks(init);
-        mHandler.postDelayed(init, 1000);
+        usbHandler = UsbHandler.getInstance();
+        stick = usbHandler.getCareLinkUsb();
+
+        //mHandler.removeCallbacks(init);
+        //mHandler.postDelayed(init, 1000);
 
         return 0;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            stick.close();
+        } catch (UsbException e) {
+            e.printStackTrace();
+            Log.e(TAG, "something happened when closing the usb connection");
+        }
     }
 
     @Override
@@ -122,28 +145,28 @@ public class WebViewHandler extends Service {
     private Runnable init = new Runnable() {
         @Override
         public void run() {
+//            try {
+//                stick.close();
+//            } catch (UsbException e) {
+//                e.printStackTrace();
+//            }
             initSend();
+
+            //jockey.send("doSomething", wv);
 
             mHandler.removeCallbacks(init);
         }
     };
 
-    private void doWrite(Object byteArrayCommand) {
+    private void doWrite(String command) {
         try {
-            // Convert object back to bytearray
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ObjectOutputStream os = new ObjectOutputStream(out);
-            os.writeObject(byteArrayCommand);
-
-            byte[] data = out.toByteArray();
+            byte[] data = DataConverter.hexStringArrayToByteArray(command.split(","));
 
             for(int i = 0; i < data.length; i++) {
                 Log.d(TAG, "data["+i+"] = " + data[i]);
             }
 
             stick.write(data);
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -160,7 +183,16 @@ public class WebViewHandler extends Service {
     private void doRead() {
         try {
             byte[] data = stick.read();
-            jockey.send("doRead", wv, data);
+
+            for (int i = 0; i < data.length; i++) {
+                Log.d(TAG, "data["+i+"] = " + data[i]);
+            }
+
+            String strData = DataConverter.byteArrayToString(data);
+
+            Log.d(TAG, "sending to Jockey: " + strData);
+
+            jockey.send("doRead", wv, strData);
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -199,7 +231,8 @@ public class WebViewHandler extends Service {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called write");
-                doWrite(payload.get("command"));
+                Log.d(TAG, "Received command: " + payload.get("command").toString());
+                doWrite(payload.get("command").toString());
             }
         });
 

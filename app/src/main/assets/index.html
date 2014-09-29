@@ -14,40 +14,67 @@
 			    });
 
 			    Jockey.send("read");
+
+			    setTimeout(doClose, 2000);
+			    var result = "Serial: " + json.serial + "\n Product" + json.product  + "\nDescription" + json.description + "\nFirmware" + json.firmware  + "\n";
     -->
 
     <script type="text/javascript">
 
             var opcode = [0x04,0x00];
-            var data;
+            var opcode2 = "0x04,0x00";
 
 			Jockey.on("send-opcode", function() {
 			    Jockey.send("open");
 
 			    setTimeout(doWrite, 1000);
-			    setTimeout(doRead, 1000)
+			    setTimeout(doRead, 1000);
+
+			});
+
+			Jockey.on("doSomething", function() {
+			    Jockey.send("write", { command: opcode2 } )
 			});
 
 			function doWrite() {
-			    Jockey.send("write", function() {
-			        command: opcode
-			    });
+			    Jockey.send("write", { command: opcode2 } )
 			}
 
 			function doRead() {
 			    Jockey.send("read");
 			}
 
+			function doClose() {
+			    Jockey.send("close");
+			}
+
 			Jockey.on("doRead", function(payload) {
     			<!-- READ PAYLOAD -->
-    			data = payload.data;
+    			var returned = payload;
+    			console.log(returned);
+
 		        <!-- DECODE -->
+		        var array = returned.split(' ').map(function(c) {return parseInt(c, 16)});
+
+		        console.log(array);
+
+		        var result = decode_product_info(array);
+		        var json = JSON.stringify(result);
 
 		        <!-- SEND BACK -->
-		        Jockey.send("message", {
-		            message: data
-		        });
+		        Jockey.send("message", { message: json } )
 			});
+
+			function decode_product_info (data) {
+                data = new Buffer(data.slice(3));
+                return {
+                      serial      : data.slice(0,3).toString('hex')
+                    , product     : [ data[3].toString( ), data[4].toString( ) ].join('.')
+                    , description : data.slice(6, 16).toString( )
+                    , firmware    : [ data[16].toString( ), data[17].toString( ) ].join('.')
+
+                };
+            }
     </script>
 
 </head>

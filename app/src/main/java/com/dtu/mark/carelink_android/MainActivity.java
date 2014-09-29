@@ -1,6 +1,7 @@
 package com.dtu.mark.carelink_android;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import com.dtu.mark.carelink_android.Services.WebViewHandler;
 import com.dtu.mark.carelink_android.USB.CareLinkUsb;
 import com.dtu.mark.carelink_android.USB.UsbException;
+import com.dtu.mark.carelink_android.USB.UsbHandler;
 
 
 public class MainActivity extends Activity {
@@ -48,12 +50,20 @@ public class MainActivity extends Activity {
 
     public void onInitCommand(View view) {
         try {
-            CareLinkUsb stick = new CareLinkUsb(this);
-            Intent intent = new Intent(this, WebViewHandler.class);
-            intent.putExtra("stick", (android.os.Parcelable) stick);
+            if (!isMyServiceRunning()) {
 
+                UsbHandler handler = UsbHandler.getInstance();
 
-            startService(intent);
+                //if (handler.getCareLinkUsb() != null){
+                    CareLinkUsb stick = new CareLinkUsb(this);
+                    handler.setCareLinkUsb(stick);
+                //}
+
+                Intent intent = new Intent(this, WebViewHandler.class);
+                //intent.putExtra("stick", (android.os.Parcelable) stick);
+
+                startService(intent);
+            }
         } catch (UsbException e) {
             e.printStackTrace();
             Log.d(TAG, "error here");
@@ -65,7 +75,9 @@ public class MainActivity extends Activity {
     private BroadcastReceiver logUpdate = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            appendToLog(intent.getExtras().getString("dmsg"));
+            String msg = intent.getExtras().getString("dmsg");
+            Log.d("WebViewHandler", "MainActivity received a message: " + msg);
+            appendToLog(msg);
         }
     };
 
@@ -77,5 +89,15 @@ public class MainActivity extends Activity {
         log.append(propValue + "\n");
     }
 
+    //Check to see if service is running
+    private boolean isMyServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (WebViewHandler.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

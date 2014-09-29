@@ -61,9 +61,10 @@ public class CareLinkUsb {
             }
         }
 
-        if (mUsbDevice == null) {
-            throw new UsbException("Device not found");
-        }
+//        if (mUsbDevice == null) {
+//            throw new UsbException("Device not found");
+//        }
+
 
         Log.d(TAG, "Device found\nVendorId: " + mUsbDevice.getVendorId() + "\nProductId: " + mUsbDevice.getProductId());
     }
@@ -74,6 +75,12 @@ public class CareLinkUsb {
      * @throws UsbException
      */
     public void open() throws UsbException {
+        try {
+            if (mUsbDeviceConnection != null) {
+                Log.d(TAG, "There is already a connection open to the device!");
+                return;
+            }
+
         // Assigning interface
         mInterface = mUsbDevice.getInterface(0);
 
@@ -88,6 +95,10 @@ public class CareLinkUsb {
 
         if (mUsbDeviceConnection == null) {
             throw new UsbException("open: no connection available");
+        }
+        } catch(Exception e) {
+            Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getStackTrace().toString());
         }
     }
 
@@ -164,6 +175,10 @@ public class CareLinkUsb {
     public byte[] sendCommand(byte[] command) throws UsbException {
         write(command);
         return read();
+    }
+
+    public UsbDevice getUsbDevice() {
+        return mUsbDevice;
     }
 
 
