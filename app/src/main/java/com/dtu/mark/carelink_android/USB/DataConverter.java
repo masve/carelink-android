@@ -42,4 +42,8 @@ public class DataConverter {
 
         return strb.toString();
     }
+
+    public static String strToJSON(String err, String strData) {
+        return  "{\"data:\":\"" + strData + "\", \"err\":\"" + err + "\"}";
+    }
 }

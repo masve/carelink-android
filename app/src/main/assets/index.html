@@ -8,75 +8,63 @@
     <!-- Required includes. json2.js may not be required in specific instances. -->
     <script type="text/javascript" src="file:///android_asset/jockey.js"></script>
 
-    <!--
-    Jockey.send("write", {
-			        command: opcode
-			    });
-
-			    Jockey.send("read");
-
-			    setTimeout(doClose, 2000);
-			    var result = "Serial: " + json.serial + "\n Product" + json.product  + "\nDescription" + json.description + "\nFirmware" + json.firmware  + "\n";
-
-			    var array = returned.split(' ').map(function(c) {return parseInt(c, 16)});
-
-		        console.log(array);
-
-		        var result = decode_product_info(array);
-		        var json = JSON.stringify(result);
-    -->
 
     <script type="text/javascript">
+            var guid = (function() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+               .toString(16)
+               .substring(1);
+  }
+  return function() {
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+           s4() + '-' + s4() + s4() + s4();
+  };
+})();
 
-            var opcode = [0x04,0x00];
-            var opcode2 = "0x04,0x00";
+var Usb = function(options) {
+  var uuid = guid();
 
-			Jockey.on("send-opcode", function() {
-			    Jockey.send("open");
+  return {
+    open: function(callback) {
+      var eventHandlerId = 'openComplete-' + uuid;
 
-			    setTimeout(doWrite, 1000);
-			    setTimeout(doRead, 2000);
+      Jockey.on(eventHandlerId, function(data) {
+          Jockey.off(eventHandlerId);
 
-			});
+          data = JSON.parse(data);
 
-			function doWrite() {
-			    Jockey.send("write", { command: opcode2 } )
-			}
+          callback(data.err);
+      });
+      Jockey.send('open', {eventHandlerId: eventHandlerId});
+    },
+    write: function(message, callback) {
+      var eventHandlerId = 'writeComplete-' + uuid;
 
-			function doRead() {
-			    Jockey.send("read");
-			}
+      Jockey.on(eventHandlerId, function(response) {
+          Jockey.off(eventHandlerId);
 
-			function doClose() {
-			    Jockey.send("close");
-			}
+          response = JSON.parse(response);
 
-			Jockey.on("doRead", function(payload) {
-    			<!-- READ PAYLOAD -->
-    			var returned = payload;
-    			console.log(returned);
+          callback(response.err);
+      });
+      Jockey.send('write', {eventHandlerId: eventHandlerId, message: message});
+    },
+    read: function(callback) {
+      var eventHandlerId = 'writeComplete-' + uuid;
 
-		        <!-- DECODE -->
-		        var result = returned.split(' ')[1];
+      Jockey.on(eventHandlerId, function(response) {
+          Jockey.off(eventHandlerId);
 
-		        <!-- SEND BACK -->
-		        Jockey.send("message", { message: result } )
+          response = JSON.parse(response);
 
-		        <!-- CLOSE CONNECTION -->
-		        Jockey.send("close");
-			});
-
-			function decode_product_info (data) {
-                data = new Buffer(data.slice(3));
-                return {
-                      serial      : data.slice(0,3).toString('hex')
-                    , product     : [ data[3].toString( ), data[4].toString( ) ].join('.')
-                    , description : data.slice(6, 16).toString( )
-                    , firmware    : [ data[16].toString( ), data[17].toString( ) ].join('.')
-
-                };
-            }
-    </script>
+          callback(response.err);
+      });
+      Jockey.send('read', {eventHandlerId: eventHandlerId});
+    }
+  }
+};
+</script>
 
 </head>
 <body>

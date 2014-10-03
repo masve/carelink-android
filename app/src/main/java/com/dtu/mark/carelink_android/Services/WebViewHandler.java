@@ -65,14 +65,7 @@ public class WebViewHandler extends Service {
         params.width = 0;
         params.height = 0;
 
-        //LinearLayout view = new LinearLayout(this);
-        //view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-
         wv = new WebView(this);
-        //wv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        //view.addView(wv);
-
-
         windowManager.addView(wv, params);
 
         /**
@@ -98,24 +91,15 @@ public class WebViewHandler extends Service {
         setJockeyEvents();
 
         wv.loadUrl("file:///android_asset/index.html");
-
-//        stick = CareLinkUsb.getInstance(this);
-
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        //Log.d(TAG, "Getting stick from intent");
-        //stick = (CareLinkUsb) intent.getParcelableExtra("stick");
-        //Log.d(TAG, "Did get the stick from intent");
-
+        /**
+         * Get the dongle instance from the UsbHandler
+         */
         usbHandler = UsbHandler.getInstance();
         stick = usbHandler.getCareLinkUsb();
-
-        //mHandler.removeCallbacks(init);
-        //mHandler.postDelayed(init, 1000);
 
         return 0;
     }
@@ -125,6 +109,8 @@ public class WebViewHandler extends Service {
         super.onDestroy();
         try {
             stick.close();
+            wv.destroy();
+            stopSelf();
         } catch (UsbException e) {
             e.printStackTrace();
             Log.e(TAG, "something happened when closing the usb connection");
@@ -137,28 +123,21 @@ public class WebViewHandler extends Service {
     }
 
     public void initSend() {
-        jockey.send("send-opcode", wv);
-        Log.d(TAG, "opcode init sent");
+        jockey.send("open", wv);
+        Log.d(TAG, "command procedure initialized");
     }
 
 
     private Runnable init = new Runnable() {
         @Override
         public void run() {
-//            try {
-//                stick.close();
-//            } catch (UsbException e) {
-//                e.printStackTrace();
-//            }
             initSend();
-
-            //jockey.send("doSomething", wv);
 
             mHandler.removeCallbacks(init);
         }
     };
 
-    private void doWrite(String command) {
+    private void doWrite(String id, String command) {
         try {
             byte[] data = DataConverter.hexStringArrayToByteArray(command.split(","));
 
@@ -166,21 +145,27 @@ public class WebViewHandler extends Service {
                 Log.d(TAG, "data[" + i + "] = " + data[i]);
             }
 
-            stick.write(data);
+            if (stick.write(data))
+                jockey.send(id, wv, DataConverter.strToJSON(null, ""));
+            else
+                throw new UsbException("could not queue the write request");
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
+            jockey.send(id, wv, DataConverter.strToJSON(e.getMessage(), ""));
         }
     }
 
-    private void doOpen() {
+    private void doOpen(String id) {
         try {
             stick.open();
+            jockey.send(id, wv, DataConverter.strToJSON(null, ""));
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
+            jockey.send(id, wv, DataConverter.strToJSON(e.getMessage(), ""));
         }
     }
 
-    private void doRead() {
+    private void doRead(String id) {
         try {
             byte[] data = stick.read();
 
@@ -192,17 +177,20 @@ public class WebViewHandler extends Service {
 
             Log.d(TAG, "sending to Jockey: " + strData);
 
-            jockey.send("doRead", wv, strData);
+            jockey.send(id, wv, DataConverter.strToJSON(null, strData));
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
+            jockey.send(id, wv, DataConverter.strToJSON(e.getMessage(), ""));
         }
     }
 
-    private void doClose() {
+    private void doClose(String id) {
         try {
             stick.close();
+            jockey.send(id, wv, DataConverter.strToJSON(null, ""));
         } catch (UsbException e) {
             Log.e(TAG, e.getMessage());
+            jockey.send(id, wv, DataConverter.strToJSON(e.getMessage(), ""));
         }
     }
 
@@ -222,7 +210,7 @@ public class WebViewHandler extends Service {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called open");
-                doOpen();
+                doOpen(payload.get("eventHandlerId").toString());
                 Log.d(TAG, "Device opened");
             }
         });
@@ -232,7 +220,7 @@ public class WebViewHandler extends Service {
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called write");
                 Log.d(TAG, "Received command: " + payload.get("command").toString());
-                doWrite(payload.get("command").toString());
+                doWrite(payload.get("eventHandlerId").toString(), payload.get("message").toString());
             }
         });
 
@@ -240,7 +228,7 @@ public class WebViewHandler extends Service {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called read");
-                doRead();
+                doRead(payload.get("eventHandlerId").toString());
             }
         });
 
@@ -248,7 +236,7 @@ public class WebViewHandler extends Service {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called close");
-                doClose();
+                doClose(payload.get("eventHandlerId").toString());
                 Log.d(TAG, "Device closed");
             }
         });
@@ -271,6 +259,4 @@ public class WebViewHandler extends Service {
             }
         });
     }
-
-
 }

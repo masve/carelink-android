@@ -151,7 +151,7 @@ public class CareLinkUsb {
      * @return Returns the response in a byte[].
      * @throws UsbException
      */
-    public void write(byte[] command) throws UsbException {
+    public boolean write(byte[] command) throws UsbException {
         if (mUsbDeviceConnection == null) {
             throw new UsbException("write: no connection available");
         }
@@ -162,7 +162,7 @@ public class CareLinkUsb {
         currentRequest.initialize(mUsbDeviceConnection, epOUT);
 
         buffer.put(command);
-        currentRequest.queue(buffer, MAX_PACKAGE_SIZE);
+        return currentRequest.queue(buffer, MAX_PACKAGE_SIZE);
     }
 
     /**
