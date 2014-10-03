@@ -109,8 +109,8 @@ public class WebViewHandler extends Service {
         super.onDestroy();
         try {
             stick.close();
-            wv.destroy();
-            stopSelf();
+//            wv.destroy();
+//            stopSelf();
         } catch (UsbException e) {
             e.printStackTrace();
             Log.e(TAG, "something happened when closing the usb connection");
@@ -123,7 +123,7 @@ public class WebViewHandler extends Service {
     }
 
     public void initSend() {
-        jockey.send("open", wv);
+        jockey.send("send-opcode", wv);
         Log.d(TAG, "command procedure initialized");
     }
 
@@ -219,7 +219,7 @@ public class WebViewHandler extends Service {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
                 Log.d(TAG, "Jockey called write");
-                Log.d(TAG, "Received command: " + payload.get("command").toString());
+                Log.d(TAG, "Received command: " + payload.get("message").toString() + " id: " + payload.get("eventHandlerId").toString());
                 doWrite(payload.get("eventHandlerId").toString(), payload.get("message").toString());
             }
         });

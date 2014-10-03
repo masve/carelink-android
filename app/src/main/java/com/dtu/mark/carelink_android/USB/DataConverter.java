@@ -1,5 +1,7 @@
 package com.dtu.mark.carelink_android.USB;
 
+import android.util.Log;
+
 /**
  * Created by marksv on 9/29/14.
  */
@@ -44,6 +46,11 @@ public class DataConverter {
     }
 
     public static String strToJSON(String err, String strData) {
-        return  "{\"data:\":\"" + strData + "\", \"err\":\"" + err + "\"}";
+        if (err == null)
+            err = "";
+        Log.d("WebViewHandler", "converting: " + err + " and " + strData + "to JSON");
+        String result = "{\"data\":\"" + strData + "\", \"err\":\"" + err + "\"}";
+        Log.d("WebViewHandler", "converted: " + result);
+        return  result;
     }
 }

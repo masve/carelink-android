@@ -1,76 +1,14 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-    <!-- JQuery isn't needed for JockeyJS, just used in this example. -->
-    <script type="text/javascript" src="file:///android_asset/jquery-1.9.1.js"></script>
-
+    <script type="text/javascript" src="file:///android_asset/js/lib/jquery-1.9.1.js"></script>
     <!-- Required includes. json2.js may not be required in specific instances. -->
-    <script type="text/javascript" src="file:///android_asset/jockey.js"></script>
-
-
-    <script type="text/javascript">
-            var guid = (function() {
-  function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-               .toString(16)
-               .substring(1);
-  }
-  return function() {
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-           s4() + '-' + s4() + s4() + s4();
-  };
-})();
-
-var Usb = function(options) {
-  var uuid = guid();
-
-  return {
-    open: function(callback) {
-      var eventHandlerId = 'openComplete-' + uuid;
-
-      Jockey.on(eventHandlerId, function(data) {
-          Jockey.off(eventHandlerId);
-
-          data = JSON.parse(data);
-
-          callback(data.err);
-      });
-      Jockey.send('open', {eventHandlerId: eventHandlerId});
-    },
-    write: function(message, callback) {
-      var eventHandlerId = 'writeComplete-' + uuid;
-
-      Jockey.on(eventHandlerId, function(response) {
-          Jockey.off(eventHandlerId);
-
-          response = JSON.parse(response);
-
-          callback(response.err);
-      });
-      Jockey.send('write', {eventHandlerId: eventHandlerId, message: message});
-    },
-    read: function(callback) {
-      var eventHandlerId = 'writeComplete-' + uuid;
-
-      Jockey.on(eventHandlerId, function(response) {
-          Jockey.off(eventHandlerId);
-
-          response = JSON.parse(response);
-
-          callback(response.err);
-      });
-      Jockey.send('read', {eventHandlerId: eventHandlerId});
-    }
-  }
-};
-</script>
-
+    <script type="text/javascript" src="file:///android_asset/js/lib/jockey.js"></script>
+    <script type="text/javascript" src="file:///android_asset/js/lib/guid.js"></script>
+    <script type="text/javascript" src="file:///android_asset/js/lib/common.min.js"></script>
+    <script type="text/javascript" src="file:///android_asset/js/usb.js"></script>
+    <script type="text/javascript" src="file:///android_asset/js/app.js"></script>
 </head>
 <body>
-
-<span id="counter">0</span>
-
 </body>
 </html>
-
