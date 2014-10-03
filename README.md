@@ -1,18 +1,4 @@
-carelink-android-(current)master
-================
-
-Communication between CareLink USB stick and Android using the USB Host API.
-
-The following gist shows the bytearray response from the stick using simple commands:
-
-https://gist.github.com/marksvdev/d179729faeef3d66d4b0
-
-In the screenshot shown below the response from the opcode [ 0x04, 0x00 ] in non-decoded-toString form:
-
-![com1](http://i.imgur.com/CzHlNWY.png)
-
-
-carelink-android-prototype
+carelink-android-prototype_wip
 ===============
 
 Currently working on branch carelink-android-prototype.
@@ -24,3 +10,6 @@ The following diagram shows a rough sketch of what I'm trying to accomplish:
 ![sketch](http://i.imgur.com/s5marpg.png)
 
 Basically trying to move most of the control from Java (see current master branch) to Jockey. Only using Java/Android as a passthrough to the stick using its Usb Host API.
+
+
+This branch was a proof of concept to demonstrate the above sketch. This is now implemented, and we will move forward on another branch.
