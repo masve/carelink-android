@@ -2,13 +2,56 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <script type="text/javascript" src="file:///android_asset/js/lib/jquery-1.9.1.js"></script>
-    <!-- Required includes. json2.js may not be required in specific instances. -->
     <script type="text/javascript" src="file:///android_asset/js/lib/jockey.js"></script>
     <script type="text/javascript" src="file:///android_asset/js/lib/guid.js"></script>
     <script type="text/javascript" src="file:///android_asset/js/lib/common.min.js"></script>
+    <script type="text/javascript" src="file:///android_asset/js/lib/console.js"></script>
     <script type="text/javascript" src="file:///android_asset/js/usb.js"></script>
-    <script type="text/javascript" src="file:///android_asset/js/app.js"></script>
+    <!--<script type="text/javascript" src="file:///android_asset/js/app.js"></script>-->
+
+    <style>
+        #debugDiv {height: 400px; width: 300px; border: 1px solid #333; overflow:scroll;}
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+
+        var usb = Usb();
+
+$("#init").on("click", function() {
+  common.step([
+    function(next) {
+      console.log('opening device...');
+      usb.open(next);
+      console.log('device opened');
+    },
+    function(data, next) {
+      var command = '0x04,0x00';
+      console.log('sending command: ' + command);
+      usb.write('0x04,0x00', next);
+      console.log('command sent');
+    },
+    function(data, next) {
+      console.log('initiating read...');
+      usb.read(next);
+    },
+    function(data) {
+      console.log('read output from stick: ' + data);
+      Jockey.send('message', {message: 'read done: ' + data});
+    }
+  ],
+  function(err) {
+    console.log('error: ' + err);
+    Jockey.send('message', {message: 'error: ' + err});
+  });
+});
+
+        });
+    </script>
 </head>
 <body>
+    <div id="debugDiv"></div>
+    <button id="init">Send Command</button>
 </body>
 </html>
