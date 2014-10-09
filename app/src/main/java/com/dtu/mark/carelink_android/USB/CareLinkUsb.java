@@ -61,9 +61,9 @@ public class CareLinkUsb {
             }
         }
 
-//        if (mUsbDevice == null) {
-//            throw new UsbException("Device not found");
-//        }
+        if (mUsbDevice == null) {
+            throw new UsbException("Device not found");
+        }
 
 
         Log.d(TAG, "Device found\nVendorId: " + mUsbDevice.getVendorId() + "\nProductId: " + mUsbDevice.getProductId());
