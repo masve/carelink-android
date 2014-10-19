@@ -2,32 +2,28 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res" >
+        <source path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res" >
             <file
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/values-v14/styles.xml"
-                qualifiers="v14" >
-
-                <style
-                    name="AppBaseTheme"
-                    parent="android:Theme.Holo.Light.DarkActionBar" >
-
-                    <!-- API 14 theme customizations can go here. -->
-                </style>
-            </file>
+                name="ic_launcher"
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-hdpi/ic_launcher.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
             <file
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/values-v11/styles.xml"
-                qualifiers="v11" >
-
-                <style
-                    name="AppBaseTheme"
-                    parent="android:Theme.Holo.Light" >
-
-                    <!-- API 11 theme customizations can go here. -->
-                </style>
-            </file>
-            <file
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/values/styles.xml"
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/values/strings.xml"
                 qualifiers="" >
+                <string name="app_name" >JockeyJS
+                </string>
+            </file>
+            <file
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/values/styles.xml"
+                qualifiers="" >
+
+                <style
+                    name="AppTheme"
+                    parent="AppBaseTheme" >
+
+                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                </style>
 
                 <style
                     name="AppBaseTheme"
@@ -39,41 +35,45 @@
             backward-compatibility can go here.
                     -->
                 </style>
+            </file>
+            <file
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/values-v11/styles.xml"
+                qualifiers="v11" >
 
                 <style
-                    name="AppTheme"
-                    parent="AppBaseTheme" >
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light" >
 
-                    <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+                    <!-- API 11 theme customizations can go here. -->
                 </style>
             </file>
             <file
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/values/strings.xml"
-                qualifiers="" >
-                <string name="app_name" >JockeyJS
-                </string>
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/values-v14/styles.xml"
+                qualifiers="v14" >
+
+                <style
+                    name="AppBaseTheme"
+                    parent="android:Theme.Holo.Light.DarkActionBar" >
+
+                    <!-- API 14 theme customizations can go here. -->
+                </style>
             </file>
             <file
                 name="ic_launcher"
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-hdpi/ic_launcher.png"
-                qualifiers="hdpi-v4"
-                type="drawable" />
-            <file
-                name="ic_launcher"
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-xhdpi/ic_launcher.png"
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-xhdpi/ic_launcher.png"
                 qualifiers="xhdpi-v4"
                 type="drawable" />
             <file
                 name="ic_launcher"
-                path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-mdpi/ic_launcher.png"
+                path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/main/res/drawable-mdpi/ic_launcher.png"
                 qualifiers="mdpi-v4"
                 type="drawable" />
         </source>
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/build/generated/res/rs/release" />
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/build/generated/res/generated/release" />
+        <source path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/build/generated/res/rs/release" />
+        <source path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/build/generated/res/generated/release" />
     </dataSet>
     <dataSet config="release" >
-        <source path="/home/marksv/project/git/carelink-android/libraries/jockeyJSAndroid/src/release/res" />
+        <source path="/home/bewest/src/carelink-android/libraries/jockeyJSAndroid/src/release/res" />
     </dataSet>
 
 </merger>

@@ -61,11 +61,12 @@ public class WebViewHandler extends Service {
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.TOP | Gravity.START;
         params.x = 0;
-        params.y = 0;
-        params.width = 0;
-        params.height = 0;
+        params.y = 100;
+        params.width = 100;
+        params.height = 50;
 
         wv = new WebView(this);
+        wv.setWebContentsDebuggingEnabled(true);
         windowManager.addView(wv, params);
 
         /**
