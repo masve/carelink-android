@@ -18,7 +18,6 @@ util.inherits(JockeyDuplex, Duplex);
 JockeyDuplex.prototype.open = function open (cb) {
   this.initialized = true;
   var reg = 'openComplete-' + this.uuid;
-  var reader = 'readComplete-' + this.uuid;
   Jockey.on(reg, function (resp) {
     Jockey.off(reg);
     resp = JSON.parse(resp);
@@ -27,24 +26,27 @@ JockeyDuplex.prototype.open = function open (cb) {
   });
   Jockey.send('open', {eventHandlerId: reg});
 
-  var self = this;
-  Jockey.on(reader, function (resp) {
-    resp = JSON.parse(resp);
-    if (resp.err) throw err;
-    self.push(decode(resp.data));
-  });
 
 }
 
 JockeyDuplex.prototype._read = function read (n) {
 
+  var reader = 'readComplete-' + this.uuid;
   var reg = 'readComplete-' + this.uuid;
   Jockey.send('read', {eventHandlerId: reg});
+  var self = this;
+  Jockey.on(reader, function (resp) {
+    resp = JSON.parse(resp);
+    if (resp.err && resp.err != "there is nothing to read") throw resp.err;
+    console.log('READ RESP', resp);
+    self.push(decode(resp.data));
+  });
 }
 
 function decode (str) {
-  var p = str.split(',');
   var result = new Buffer('');
+  if (!str) return result;
+  var p = str.split(',');
   p.forEach(function iter (hex) {
     result = Buffer.concat([result, new Buffer(hex.slice(2), 'hex')]);
 
@@ -69,7 +71,9 @@ JockeyDuplex.prototype._write = function write (chunk, enc, cb) {
     resp = JSON.parse(resp);
     cb(resp.err, resp);
   });
-  Jockey.send('write', {eventHandlerId: reg, message: encode(chunk) });
+  var msg = encode(chunk);
+  console.log('send write', msg);
+  Jockey.send('write', {eventHandlerId: reg, message: msg });
 
 }
 
@@ -11019,19 +11023,22 @@ function do_stuff (opts) {
     console.log("ERROR XXX", arguments);
     stream.close( );
   });
+  stream.open(ready);
+  function ready ( ) {
 
-  var session = comlink(stream);
-  session.uart.open(function (ctx) {
-      console.log('OPENED');
+    var session = comlink(stream);
+    session.uart.open(function (ctx) {
+        console.log('OPENED');
 
-    })
-    .stats(console.log.bind(console, 'IFACE'))
-    .signal_status(console.log.bind(console, 'signal stength'))
-    .poll_signal(console.log.bind(console, 'SIGNAL'))
-    .status(console.log.bind(console, 'STATUS'))
-    .stats(console.log.bind(console, 'INTERFACE STATS'))
-    .close( )
-  ;
+      })
+      .stats(console.log.bind(console, 'IFACE'))
+      .signal_status(console.log.bind(console, 'signal stength'))
+      .poll_signal(console.log.bind(console, 'SIGNAL'))
+      .status(console.log.bind(console, 'STATUS'))
+      .stats(console.log.bind(console, 'INTERFACE STATS'))
+      .close( )
+    ;
+  }
 
 
 
