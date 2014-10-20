@@ -79,6 +79,16 @@ public class MainActivity extends Activity {
             }
         });
 
+        jockey.on("command", new JockeyHandler() {
+            @Override
+            protected void doPerform(Map<Object, Object> payload) {
+                String command = payload.get("message").toString();
+                String id = payload.get("eventHandlerId").toString();
+                Log.d(TAG, "Command initiated: " + command);
+                doCommand(id, command);
+            }
+        });
+
         jockey.on("write", new JockeyHandler() {
             @Override
             protected void doPerform(Map<Object, Object> payload) {
@@ -113,16 +123,37 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void doCommand(String id, String commandStr) {
+        try {
+            byte[] command = DataConverter.hexStringArrayToByteArray(commandStr.split(","));
+
+            byte[] result = stick.sendCommand(command);
+            String resultStr = DataConverter.byteArrayToString(result);
+
+            Log.d(TAG, "sending to Jockey: " + resultStr);
+
+            jockey.send(id, wv, DataConverter.strToJSON(null, resultStr));
+        } catch (UsbException e) {
+            Log.e(TAG, e.getMessage());
+            jockey.send(id, wv, DataConverter.strToJSON(e.getMessage(), ""));
+        }
+    }
+
     private void doWrite(String id, String command) {
         try {
             byte[] data = DataConverter.hexStringArrayToByteArray(command.split(","));
 
+            String dataStr = "";
+
             for (int i = 0; i < data.length; i++) {
-                Log.d(TAG, "data[" + i + "] = " + data[i]);
+                dataStr += data[i] + " ";
             }
 
-            if (stick.write(data))
+            Log.d(TAG, dataStr);
+
+            if (stick.write(data)) {
                 jockey.send(id, wv, DataConverter.strToJSON(null, ""));
+            }
             else
                 throw new UsbException("could not queue the write request");
         } catch (UsbException e) {
@@ -145,9 +176,13 @@ public class MainActivity extends Activity {
         try {
             byte[] data = stick.read();
 
+            String resultStr = "";
+
             for (int i = 0; i < data.length; i++) {
-                Log.d(TAG, "data[" + i + "] = " + data[i]);
+                resultStr += data[i] + " ";
             }
+
+            Log.d(TAG, resultStr);
 
             String strData = DataConverter.byteArrayToString(data);
 
